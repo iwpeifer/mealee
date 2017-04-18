@@ -1,5 +1,5 @@
 require_relative '../config/environment.rb'
-require_relative '../yelpmealee.rb'
+require_relative '../lib/yelpmealee.rb'
 
 
 puts "Welcome to Mealee!"
