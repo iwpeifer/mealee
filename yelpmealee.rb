@@ -20,17 +20,6 @@ DEFAULT_TERM = "dinner"
 DEFAULT_LOCATION = "11 Broadway, New York, NY"
 SEARCH_LIMIT = 40
 
-
-# Make a request to the Fusion API token endpoint to get the access token.
-# 
-# host - the API's host
-# path - the oauth2 token path
-#
-# Examples
-#
-#   bearer_token
-#   # => "Bearer some_fake_access_token"
-#
 # Returns your access token
 def bearer_token
   # Put the url together
@@ -55,33 +44,6 @@ def bearer_token
   #'Bearer Vj13HHAG_05aJd_T4tQ5dN4u2e7iiUW4aaQkJlUaZS65nh-nwMdvpWznwlcOb8B2w9v-afJMPV6XMaZrQF67XukVB_kcnjoP9_4VOGf_jXP2eCfPoailjyqLDyT1WHYx'
 end
 
-
-# Make a request to the Fusion search endpoint. Full documentation is online at:
-# https://www.yelp.com/developers/documentation/v3/business_search
-#
-# term - search term used to find businesses
-# location - what geographic location the search should happen
-#
-# Examples
-#
-#   search("burrito", "san francisco")
-#   # => {
-#          "total": 1000000,
-#          "businesses": [
-#            "name": "El Farolito"
-#            ...
-#          ]
-#        }
-#
-#   search("sea food", "Seattle")
-#   # => {
-#          "total": 1432,
-#          "businesses": [
-#            "name": "Taylor Shellfish Farms"
-#            ...
-#          ]
-#        }
-#
 # Returns a parsed json object of the request
 def search(term, location)
   url = "#{API_HOST}#{SEARCH_PATH}"
@@ -147,20 +109,6 @@ def choose_ten(options)
 end
 
 
-# Look up a business by a given business id. Full documentation is online at:
-# https://www.yelp.com/developers/documentation/v3/business
-# 
-# business_id - a string business id
-#
-# Examples
-# 
-#   business("yelp-san-francisco")
-#   # => {
-#          "name": "Yelp",
-#          "id": "yelp-san-francisco"
-#          ...
-#        }
-#
 # Returns a parsed json object of the request
 def business(business_id)
   url = "#{API_HOST}#{BUSINESS_PATH}#{business_id}"
