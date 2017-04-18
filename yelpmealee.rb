@@ -14,6 +14,12 @@ class Mealee
   DEFAULT_LOCATION = "11 Broadway, New York, NY"
   SEARCH_LIMIT = 40
 
+  attr_accessor :url
+  def initialize
+    @url = nil
+  end
+  
+
   def bearer_token
     url = "#{API_HOST}#{TOKEN_PATH}"
 
@@ -122,6 +128,7 @@ class Mealee
           if input == '1!' || input == '2!'
             winner = winner if input == '1!'
             winner = challenger if input == '2!'
+            self.url = winner[:url]
             break
           end
 
@@ -130,6 +137,7 @@ class Mealee
 
           winner = winner if input == 1.to_s
           winner = challenger if input == 2.to_s
+          self.url = winner[:url]
       end
 
       puts "We recommend you go to " + "#{winner[:title]}".green + "!"        
@@ -140,7 +148,7 @@ class Mealee
     choice = gets.chomp.downcase
     # binding.pry #####################
     if choice == "yes"
-      Launchy.open(winner[:url])
+      Launchy.open(self.url)
       return 1
     else
       puts "Would you like another ten options? (" + "Yes".green + " or " + "No".red + ")"

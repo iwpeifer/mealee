@@ -4,7 +4,7 @@ require_relative '../yelpmealee.rb'
 
 puts "Welcome to Mealee!"
 puts "Please enter your " + "zip code".blue + ":"
-binding.pry
+#binding.pry
 location = gets.chomp
 puts " "
 puts "What are you lookin' for?"
