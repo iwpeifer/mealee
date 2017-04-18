@@ -2,9 +2,9 @@ require_relative '../config/environment.rb'
 require_relative '../yelpmealee.rb'
 
 puts "Welcome to Mealee!"
-puts "Please enter your zip code:"
+puts "Please enter your " + "zip code".blue + ":"
 location = gets.chomp
-puts "Please choose dinner or lunch:"
+puts "What are you lookin' for?"
 term = gets.chomp
 #binding.pry
 

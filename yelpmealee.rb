@@ -102,9 +102,10 @@ class Mealee
 
           input = 0
           until input == "1" || input == "2" || input == "1!" || input == "2!" do
-              puts "Please choose option 1 or 2. Type 1! or 2! if you've found on a winner. You can also type 'help' or 'exit'"
+              puts "Please choose option 1 or 2. Type '1!' or '2!' if you've found on a winner. You can also type 'help' or 'exit'"
+              puts "Type 'more' to see Yelp pages"
               puts "   "
-              input = gets.chomp
+              input = gets.chomp.downcase
               if input == "exit" 
                 puts "   "
                 puts "Thanks for playing!"
@@ -117,8 +118,11 @@ class Mealee
                 display_choices(winner, challenger)
                 puts "---"
                 puts "   "
+              elsif input == "more"
+                Launchy.open(winner[:url])
+                Launchy.open(challenger[:url])
               end
-              
+
           end
           
           if input == '1!' || input == '2!'
@@ -134,20 +138,20 @@ class Mealee
           winner = challenger if input == 2.to_s
       end
 
-      puts "We recommend you go to #{winner[:title]}!"        
+      puts "We recommend you go to " + "#{winner[:title]}".green + "!"        
   end
 
   def satisfied
-    puts "Are you happy with your recommendation? (Yes or No)"
-    choice = gets.chomp
+    puts "Are you happy with your recommendation? (" + "Yes".green + " or " + "No".red + ")"
+    choice = gets.chomp.downcase
     # binding.pry #####################
-    if choice == "Yes"
+    if choice == "yes"
       Launchy.open(self.url)
       return 1
     else
-      puts "Would you like another ten options? (Yes or No)"
-      choice = gets.chomp
-      if choice == "Yes"
+      puts "Would you like another ten options? (" + "Yes".green + " or " + "No".red + ")"
+      choice = gets.chomp.downcase
+      if choice == "yes"
       return 2
     else 
       return 1
