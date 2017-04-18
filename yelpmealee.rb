@@ -51,14 +51,15 @@ class Mealee
     restaurant[:rating] = "#{x["rating"]} based on #{x["review_count"]} reviews" 
     restaurant[:location] = x["location"]["display_address"].join(", ").to_s
     restaurant[:categories] = x["categories"].collect {|y| y["title"]}.join(", ").to_s
+    #binding.pry
     restaurant[:distance] = "#{(x["distance"]/100).round} minute walk"
     restaurant[:price] = "#{x["price"]}"
 
 
     options << restaurant
       }
-
-    self.choose_ten(options.sample(10))
+      options_set = options.sample(10)
+    self.choose_ten(options_set)
   end
 
   def choose_ten(options)
@@ -70,34 +71,53 @@ class Mealee
               challenger = options.sample
           end
 
+          puts "   "
+          puts "---"
           puts winner        
           puts challenger
+          puts "---"
+          puts "   "
 
           input = 0
-          until input == "1" || input == "2" do
-              puts "Please choose 1 or 2"
+          until input == "1" || input == "2" || input == "1!" || input == "2!" do
+              puts "Please choose option 1 or 2. Type 1! or 2! if you've found on a winner. You can also type 'help' or 'exit'"
+              puts "   "
               input = gets.chomp
+              if input == "exit" 
+                puts "   "
+                puts "Thanks for playing!"
+                exit
+              elsif input == "help"
+                puts "   "
+                puts "      Mealee is designed to help the indecisive among us and is built using the Yelp Fusion API.  Mealee pulls local business data and puts businesses side by side, allowing the user to narrow their choices until they find a business they would like to go to.  To use, enter your zip code or address, then enter what you are interested in searching for.  Search broadly for things like 'dinner' or 'museums,' or more specifically for type of cuisine or business type."
+                puts "   "
+                puts "---"
+                puts winner        
+                puts challenger
+                puts "---"
+                puts "   "
+              end
+              
           end
           
+          if input == '1!' || input == '2!'
+            winner = winner if input == '1!'
+            winner = challenger if input == '2!'
+            break
+          end
+
           options.reject! {|x| x == winner} if input == 2.to_s
           options.reject! {|x| x == challenger} if input == 1.to_s
 
           winner = winner if input == 1.to_s
           winner = challenger if input == 2.to_s
       end
+      puts "   "
+      puts "---"
       puts winner        
+      puts "---"
+      puts "   "
   end
 
 end
-
-
-
-
-# Returns a parsed json object of the request
-# def business(business_id)
-#   url = "#{API_HOST}#{BUSINESS_PATH}#{business_id}"
-
-#   response = HTTP.auth(bearer_token).get(url)
-#   response.parse
-# end
 
