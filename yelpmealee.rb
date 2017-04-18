@@ -58,16 +58,35 @@ class Mealee
     options << restaurant
       }
 
-    self.choose_ten(options.sample(10))
+    answer = 2
+    until answer == 1
+
+    options_set = options.sample(10)
+
+    ten_options = options_set.dup
+
+    # binding.pry
+
+    self.choose_ten(ten_options)
+
+    answer = self.satisfied
+
+    options.reject!{|x| options_set.include? x}
+      # binding.pry
+    end
+    puts "Thanks for using Mealee"
+      # options_set = options.sample(10)
+      # self.search(term, location)
+
   end
 
-  def choose_ten(options)
+  def choose_ten(ten_options)
 
-      winner = options.sample
-      until options.length == 1 do
-          challenger = options.sample
+      winner = ten_options.sample
+      until ten_options.length == 1 do
+          challenger = ten_options.sample
           until challenger != winner do
-              challenger = options.sample
+              challenger = ten_options.sample
           end
 
           puts winner        
@@ -79,25 +98,32 @@ class Mealee
               input = gets.chomp
           end
           
-          options.reject! {|x| x == winner} if input == 2.to_s
-          options.reject! {|x| x == challenger} if input == 1.to_s
+          ten_options.reject! {|x| x == winner} if input == 2.to_s
+          ten_options.reject! {|x| x == challenger} if input == 1.to_s
 
           winner = winner if input == 1.to_s
           winner = challenger if input == 2.to_s
       end
-      puts winner        
+      puts "We recommend you go to #{winner}!"        
   end
 
+  def satisfied
+    puts "Are you happy with your recommendation? (Yes or No)"
+    choice = gets.chomp
+    # binding.pry
+    if choice == "Yes"
+      return 1
+    else
+      puts "Would you like another ten options? (Yes or No)"
+      choice = gets.chomp
+      if choice == "Yes"
+      return 2
+    else 
+      return 1
+    end
+  end
 end
 
 
-
-
-# Returns a parsed json object of the request
-# def business(business_id)
-#   url = "#{API_HOST}#{BUSINESS_PATH}#{business_id}"
-
-#   response = HTTP.auth(bearer_token).get(url)
-#   response.parse
-# end
+end
 
