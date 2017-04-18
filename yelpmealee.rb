@@ -63,6 +63,7 @@ class Mealee
     restaurant[:url] = x["url"]
 
     options << restaurant
+    #binding.pry
       }
 
     answer = 2
@@ -75,7 +76,7 @@ class Mealee
     # binding.pry
 
     self.choose_ten(ten_options)
-
+    
     answer = self.satisfied
 
     options.reject!{|x| options_set.include? x}

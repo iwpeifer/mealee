@@ -12,14 +12,13 @@ require 'sqlite3'
 require 'yaml/store'
 require "launchy"
 
-
 DBNAME = "mealee_records"
+connection_details = YAML::load(File.open('config/database.yml'))
+DB = ActiveRecord::Base.establish_connection(connection_details)
 
 Dir[File.join(File.dirname(__FILE__), "../app/models", "*.rb")].each {|f| require f}
 Dir[File.join(File.dirname(__FILE__), "../lib/support", "*.rb")].each {|f| require f}
 
-connection_details = YAML::load(File.open('config/database.yml'))
-DB = ActiveRecord::Base.establish_connection(connection_details)
 
 
 #DBRegistry[ENV["ACTIVE_RECORD_ENV"]].connect!

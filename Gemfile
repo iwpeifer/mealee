@@ -10,3 +10,4 @@ gem "activerecord"
 gem "sqlite3"
 gem "rake"
 gem 'launchy', '~> 2.4', '>= 2.4.3'
+gem 'sinatra-activerecord'

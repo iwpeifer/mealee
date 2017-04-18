@@ -1,12 +1,8 @@
-task :console => :environment do
-  Pry.start
-end
+require "sinatra/activerecord/rake"
+require_relative "./config/environment.rb"
 
-task :environment do
-  ENV["PLAYLISTER_ENV"] ||= "development"
-  require_relative 'config/environment'
-  # require 'logger'
-  # ActiveRecord::Base.logger = Logger.new(STDOUT)
+task :console do
+  Pry.start
 end
 
 namespace :db do
@@ -22,3 +18,4 @@ namespace :db do
   task :reset => [:drop, :migrate]
 
 end
+
