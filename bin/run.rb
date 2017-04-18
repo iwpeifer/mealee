@@ -8,6 +8,7 @@ puts "Please choose dinner or lunch:"
 term = gets.chomp
 #binding.pry
 
-search(term, location)
+new_game = Mealee.new
+new_game.search(term, location)
 
 #Test
