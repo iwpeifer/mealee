@@ -89,6 +89,8 @@ class Mealee
               challenger = ten_options.sample
           end
 
+          system "clear"
+
           display_choices(winner, challenger)
 
           input = 0
@@ -151,11 +153,11 @@ end
   end
 
   def display_choices(winner, challenger)
-    puts "------".blue + " 1 ".white.on_blue.blink + "------".blue
+    puts "-------".blue + " 1 ".white.on_blue.blink + "------------------------".blue
     format(winner)
-    puts "------".red + " 2 ".white.on_red.blink + "------".red
+    puts "-------".red + " 2 ".white.on_red.blink + "------------------------".red
     format(challenger)
-    puts "---------------"
+    puts "----------------------------------"
   end
 
 end
