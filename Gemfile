@@ -6,5 +6,10 @@ gem "OptionParser"
 gem "pry"
 #gem "command_line_reporter", '>=3.0'
 gem "colorize"
+gem "activerecord"
+gem "sqlite3"
+gem "rake"
+
+
 
 
