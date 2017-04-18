@@ -14,6 +14,12 @@ class Mealee
   DEFAULT_LOCATION = "11 Broadway, New York, NY"
   SEARCH_LIMIT = 40
 
+  attr_accessor :url
+
+  def initialize
+    @url = nil
+  end
+
   def bearer_token
     url = "#{API_HOST}#{TOKEN_PATH}"
 
@@ -51,10 +57,10 @@ class Mealee
     restaurant[:rating] = "#{x["rating"]} based on #{x["review_count"]} reviews" 
     restaurant[:location] = x["location"]["display_address"].join(", ").to_s
     restaurant[:categories] = x["categories"].collect {|y| y["title"]}.join(", ").to_s
-    #binding.pry
+    #binding.pry #########
     restaurant[:distance] = "#{(x["distance"]/100).round} minute walk"
     restaurant[:price] = "#{x["price"]}"
-
+    restaurant[:url] = x["url"]
 
     options << restaurant
       }
@@ -83,6 +89,7 @@ class Mealee
   def choose_ten(ten_options)
 
       winner = ten_options.sample
+      self.url = winner[:url]
       until ten_options.length == 1 do
           challenger = ten_options.sample
           until challenger != winner do
@@ -133,8 +140,9 @@ class Mealee
   def satisfied
     puts "Are you happy with your recommendation? (Yes or No)"
     choice = gets.chomp
-    # binding.pry
+    # binding.pry #####################
     if choice == "Yes"
+      Launchy.open(self.url)
       return 1
     else
       puts "Would you like another ten options? (Yes or No)"
@@ -149,7 +157,7 @@ end
 
   def format(array)
     longest_key = array.keys.max_by(&:length)
-    array.each {|key, value| printf "%-#{longest_key.length}s %s\n", key, value}
+    array.each {|key, value| printf "%-#{longest_key.length}s %s\n", key, value if key != :url}
   end
 
   def display_choices(winner, challenger)

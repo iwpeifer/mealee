@@ -18,6 +18,8 @@ GEM
     http-form_data (1.0.1)
     http_parser.rb (0.6.0)
     json (2.1.0)
+    launchy (2.4.3)
+      addressable (~> 2.3)
     method_source (0.8.2)
     pry (0.10.4)
       coderay (~> 1.1.0)
@@ -37,6 +39,7 @@ DEPENDENCIES
   colorize
   http
   json
+  launchy (~> 2.4, >= 2.4.3)
   pry
 
 BUNDLED WITH

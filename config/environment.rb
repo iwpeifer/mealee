@@ -8,5 +8,5 @@ require "http"
 require "optparse"
 require "pry"
 require "colorize"
-#require "launchy"
+require "launchy"
 
