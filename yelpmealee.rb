@@ -47,7 +47,7 @@ class Mealee
     rest["businesses"].each {|x| 
 
     restaurant = {}
-    restaurant[:title] = x["name"]
+    restaurant[:title] = x["name"].underline
     restaurant[:rating] = "#{x["rating"]} based on #{x["review_count"]} reviews" 
     restaurant[:location] = x["location"]["display_address"].join(", ").to_s
     restaurant[:categories] = x["categories"].collect {|y| y["title"]}.join(", ").to_s
@@ -65,18 +65,16 @@ class Mealee
   def choose_ten(options)
 
       winner = options.sample
+
+      longest_key = winner.keys.max_by(&:length)
+    
       until options.length == 1 do
           challenger = options.sample
           until challenger != winner do
               challenger = options.sample
           end
 
-          puts "   "
-          puts "---"
-          puts winner        
-          puts challenger
-          puts "---"
-          puts "   "
+          display_choices(winner, challenger)
 
           input = 0
           until input == "1" || input == "2" || input == "1!" || input == "2!" do
@@ -117,6 +115,19 @@ class Mealee
       puts winner        
       puts "---"
       puts "   "
+  end
+
+  def format(array)
+    longest_key = array.keys.max_by(&:length)
+    array.each {|key, value| printf "%-#{longest_key.length}s %s\n", key, value}
+  end
+
+  def display_choices(winner, challenger)
+    puts "------".blue + " 1 ".white.on_blue.blink + "------".blue
+    format(winner)
+    puts "------".red + " 2 ".white.on_red.blink + "------".red
+    format(challenger)
+    puts "---------------"
   end
 
 end
