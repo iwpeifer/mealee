@@ -3,10 +3,10 @@ require_relative '../yelpmealee.rb'
 
 
 puts "Welcome to Mealee!"
-puts "Please enter your zip code:"
+puts "Please enter your " + "zip code".blue + ":"
 location = gets.chomp
 puts " "
-puts "Please enter search terms:"
+puts "What are you lookin' for?"
 term = gets.chomp
 
 new_game = Mealee.new

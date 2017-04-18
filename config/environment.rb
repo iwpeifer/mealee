@@ -10,6 +10,7 @@ require 'active_record'
 require 'rake'
 require 'sqlite3'
 require 'yaml/store'
+require "launchy"
 
 
 DBNAME = "mealee_records"

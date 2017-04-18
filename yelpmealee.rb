@@ -51,10 +51,10 @@ class Mealee
     restaurant[:rating] = "#{x["rating"]} based on #{x["review_count"]} reviews" 
     restaurant[:location] = x["location"]["display_address"].join(", ").to_s
     restaurant[:categories] = x["categories"].collect {|y| y["title"]}.join(", ").to_s
-    #binding.pry
+    #binding.pry #########
     restaurant[:distance] = "#{(x["distance"]/100).round} minute walk"
     restaurant[:price] = "#{x["price"]}"
-
+    restaurant[:url] = x["url"]
 
     options << restaurant
       }
@@ -83,6 +83,7 @@ class Mealee
   def choose_ten(ten_options)
 
       winner = ten_options.sample
+      self.url = winner[:url]
       until ten_options.length == 1 do
           challenger = ten_options.sample
           until challenger != winner do
@@ -95,9 +96,10 @@ class Mealee
 
           input = 0
           until input == "1" || input == "2" || input == "1!" || input == "2!" do
-              puts "Please choose option 1 or 2. Type 1! or 2! if you've found on a winner. You can also type 'help' or 'exit'"
+              puts "Please choose option 1 or 2. Type '1!' or '2!' if you've found on a winner. You can also type 'help' or 'exit'"
+              puts "Type 'more' to see Yelp pages"
               puts "   "
-              input = gets.chomp
+              input = gets.chomp.downcase
               if input == "exit" 
                 puts "   "
                 puts "Thanks for playing!"
@@ -110,8 +112,11 @@ class Mealee
                 display_choices(winner, challenger)
                 puts "---"
                 puts "   "
+              elsif input == "more"
+                Launchy.open(winner[:url])
+                Launchy.open(challenger[:url])
               end
-              
+
           end
           
           if input == '1!' || input == '2!'
@@ -127,19 +132,20 @@ class Mealee
           winner = challenger if input == 2.to_s
       end
 
-      puts "We recommend you go to #{winner[:title]}!"        
+      puts "We recommend you go to " + "#{winner[:title]}".green + "!"        
   end
 
   def satisfied
-    puts "Are you happy with your recommendation? (Yes or No)"
-    choice = gets.chomp
-    # binding.pry
-    if choice == "Yes"
+    puts "Are you happy with your recommendation? (" + "Yes".green + " or " + "No".red + ")"
+    choice = gets.chomp.downcase
+    # binding.pry #####################
+    if choice == "yes"
+      Launchy.open(winner[:url])
       return 1
     else
-      puts "Would you like another ten options? (Yes or No)"
-      choice = gets.chomp
-      if choice == "Yes"
+      puts "Would you like another ten options? (" + "Yes".green + " or " + "No".red + ")"
+      choice = gets.chomp.downcase
+      if choice == "yes"
       return 2
     else 
       return 1
@@ -149,7 +155,7 @@ end
 
   def format(array)
     longest_key = array.keys.max_by(&:length)
-    array.each {|key, value| printf "%-#{longest_key.length}s %s\n", key, value}
+    array.each {|key, value| printf "%-#{longest_key.length}s %s\n", key, value if key != :url}
   end
 
   def display_choices(winner, challenger)
