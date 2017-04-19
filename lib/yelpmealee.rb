@@ -14,12 +14,15 @@ class Mealee
   DEFAULT_LOCATION = "11 Broadway, New York, NY"
   SEARCH_LIMIT = 40
 
-  attr_accessor :url
-  def initialize
+  attr_accessor :url, :options, :search_url, :search_params
+
+  def initialize(term, location)
     @url = nil
+    @options = []
+    @search_url = "#{API_HOST}#{SEARCH_PATH}"
+    @search_params = {term: term, location: location, limit: SEARCH_LIMIT}
   end
   
-
   def bearer_token
     url = "#{API_HOST}#{TOKEN_PATH}"
 
@@ -38,132 +41,125 @@ class Mealee
     "#{parsed['token_type']} #{parsed['access_token']}"
   end
 
-  def search(term, location)
-    url = "#{API_HOST}#{SEARCH_PATH}"
-    params = {
-      term: term,
-      location: location,
-      limit: SEARCH_LIMIT
-    }
+  def create_restaurants(results)
+      results["businesses"].each do |x| 
+	      restaurant = {}
+	      restaurant[:name] = x["name"].underline
+	      restaurant[:rating] = "#{x["rating"]} based on #{x["review_count"]} reviews" 
+	      restaurant[:review_count] = x["review_count"]
+	      restaurant[:location] = x["location"]["display_address"].join(", ").to_s
+	      restaurant[:category] = x["categories"].collect {|y| y["title"]}.join(", ").to_s
+	      restaurant[:distance] = "#{(x["distance"]/100).round} minute walk"
+	      restaurant[:price] = "#{x["price"]}"
+	      restaurant[:url] = x["url"]
+	      self.options << restaurant
+    	end
+  end
 
-    response = HTTP.auth(self.bearer_token).get(url, params: params)
-    rest = response.parse
-    options = []
-      
-    rest["businesses"].each {|x| 
+  def populate_options
+  	response = HTTP.auth(self.bearer_token).get(search_url, params: search_params).parse
+    create_restaurants(response)
+  end
 
-    restaurant = {}
-    restaurant[:name] = x["name"].underline
-    restaurant[:rating] = "#{x["rating"]} based on #{x["review_count"]} reviews" 
-    restaurant[:review_count] = x["review_count"]
-    restaurant[:location] = x["location"]["display_address"].join(", ").to_s
-    restaurant[:category] = x["categories"].collect {|y| y["title"]}.join(", ").to_s
-    #binding.pry #########
-    restaurant[:distance] = "#{(x["distance"]/100).round} minute walk"
-    restaurant[:price] = "#{x["price"]}"
-    restaurant[:url] = x["url"]
+  def ran_out_of_options?
+  	self.options.length <= 1
+  end
 
-    options << restaurant
-    #binding.pry
-      }
+  def search
+    populate_options
 
     answer = 2
     until answer == 1
-
-    options_set = options.sample(10)
-
-    ten_options = options_set.dup
-
-    # binding.pry
-
-    self.choose_ten(ten_options)
-    
-    answer = self.satisfied
-
-    options.reject!{|x| options_set.include? x}
-      # binding.pry
+	    options_set = options.sample(10)
+	    ten_options = options_set.dup
+	    self.choose_ten(ten_options)
+	    answer = self.satisfied
+	    options.reject!{|x| options_set.include? x}
     end
-    puts "Thanks for using Mealee"
-      # options_set = options.sample(10)
-      # self.search(term, location)
+    puts "Thanks for using Mealee" 
   end
 
   def choose_ten(ten_options)
 
-      winner = ten_options.sample
-      self.url = winner[:url]
-      until ten_options.length == 1 do
-          challenger = ten_options.sample
-          until challenger != winner do
-              challenger = ten_options.sample
-          end
+  	if ran_out_of_options?
+  		puts "SORRY, YOU ARE HOPELESSLY INDECISIVE".red.blink
+  		exit
+  	end
 
-          system "clear"
+	  winner = ten_options.sample
+	  self.url = winner[:url]
+	  until ten_options.length == 1 do
+	      challenger = ten_options.sample
+	      until challenger != winner do
+	          challenger = ten_options.sample
+	      end
 
-          display_choices(winner, challenger)
+	      system "clear"
 
-          input = 0
-          until input == "1" || input == "2" || input == "1!" || input == "2!" do
-              puts "Please choose option 1 or 2. Type '1!' or '2!' if you've found on a winner. You can also type 'help' or 'exit'"
-              puts "Type 'more' to see Yelp pages"
-              puts "   "
-              input = gets.chomp.downcase
-              if input == "exit" 
-                puts "   "
-                puts "Thanks for playing!"
-                exit
-              elsif input == "help"
-                puts "   "
-                puts "      Mealee is designed to help the indecisive among us and is built using the Yelp Fusion API.  Mealee pulls local business data and puts businesses side by side, allowing the user to narrow their choices until they find a business they would like to go to.  To use, enter your zip code or address, then enter what you are interested in searching for.  Search broadly for things like 'dinner' or 'museums,' or more specifically for type of cuisine or business type."
-                puts "   "
-                puts "---"
-                display_choices(winner, challenger)
-                puts "---"
-                puts "   "
-              elsif input == "more"
-                Launchy.open(winner[:url])
-                Launchy.open(challenger[:url])
-              end
+	      display_choices(winner, challenger)
 
-          end
-          
-          if input == '1!' || input == '2!'
-            r1 = Restaurant.find_or_create_by(name: winner[:name].uncolorize, location: winner[:location], category: winner[:category], price: winner[:price])
-            r2 = Restaurant.find_or_create_by(name: challenger[:name].uncolorize, location: challenger[:location], category: challenger[:category], price: challenger[:price])
-            
-            if input == '1!'
-              winner = winner
-              Winner.create(user_id: 1, restaurant_id: r1.id)
-              Loser.create(user_id: 1, restaurant_id: r2.id)
-            elsif input == '2!'
-              winner = challenger
-              Winner.create(user_id: 1, restaurant_id: r2.id)
-              Loser.create(user_id: 1, restaurant_id: r1.id)
-            end
-            self.url = winner[:url]            
-            #binding.pry
-            break
-          end
+	      input = 0
+	      until input == "1" || input == "2" || input == "1!" || input == "2!" do
+	          puts "Please choose option 1 or 2. Type '1!' or '2!' if you've found on a winner. You can also type 'help' or 'exit'"
+	          puts "Type 'more' to see Yelp pages"
+	          puts "   "
+	          input = gets.chomp.downcase
+	          if input == "exit" 
+	            puts "   "
+	            puts "Thanks for playing!"
+	            exit
+	          elsif input == "help"
+	            puts "   "
+	            puts "      Mealee is designed to help the indecisive among us and is built using the Yelp Fusion API.  Mealee pulls local business data and puts businesses side by side, allowing the user to narrow their choices until they find a business they would like to go to.  To use, enter your zip code or address, then enter what you are interested in searching for.  Search broadly for things like 'dinner' or 'museums,' or more specifically for type of cuisine or business type."
+	            puts "   "
+	            puts "---"
+	            display_choices(winner, challenger)
+	            puts "---"
+	            puts "   "
+	          elsif input == "more"
+	            Launchy.open(winner[:url])
+	            Launchy.open(challenger[:url])
+	          end
 
-          ten_options.reject! {|x| x == winner} if input == 2.to_s
-          ten_options.reject! {|x| x == challenger} if input == 1.to_s
+	      end
+	      
+	      if input == '1!' || input == '2!'
+	        r1 = Restaurant.find_or_create_by(name: winner[:name].uncolorize, location: winner[:location], category: winner[:category], price: winner[:price])
+	        r2 = Restaurant.find_or_create_by(name: challenger[:name].uncolorize, location: challenger[:location], category: challenger[:category], price: challenger[:price])
+	        
+	        if input == '1!'
+	          winner = winner
+	          Winner.create(user_id: 1, restaurant_id: r1.id)
+	          Loser.create(user_id: 1, restaurant_id: r2.id)
+	        elsif input == '2!'
+	          winner = challenger
+	          Winner.create(user_id: 1, restaurant_id: r2.id)
+	          Loser.create(user_id: 1, restaurant_id: r1.id)
+	        end
+	        self.url = winner[:url]            
+	        #binding.pry
+	        break
+	      end
 
-          r1 = Restaurant.find_or_create_by(name: winner[:name].uncolorize, location: winner[:location], category: winner[:category], price: winner[:price])
-          r2 = Restaurant.find_or_create_by(name: challenger[:name].uncolorize, location: challenger[:location], category: challenger[:category], price: challenger[:price])
-          
-          if input == '1'
-              winner = winner
-              Winner.create(user_id: 1, restaurant_id: r1.id)
-              Loser.create(user_id: 1, restaurant_id: r2.id)
-            elsif input == '2'
-              winner = challenger
-              Winner.create(user_id: 1, restaurant_id: r2.id)
-              Loser.create(user_id: 1, restaurant_id: r1.id)
-            end
-          self.url = winner[:url]
-      end
+	      ten_options.reject! {|x| x == winner} if input == 2.to_s
+	      ten_options.reject! {|x| x == challenger} if input == 1.to_s
 
-      puts "We recommend you go to " + "#{winner[:title]}".green + "!"        
+	      r1 = Restaurant.find_or_create_by(name: winner[:name].uncolorize, location: winner[:location], category: winner[:category], price: winner[:price])
+	      r2 = Restaurant.find_or_create_by(name: challenger[:name].uncolorize, location: challenger[:location], category: challenger[:category], price: challenger[:price])
+	      
+	      if input == '1'
+	          winner = winner
+	          Winner.create(user_id: 1, restaurant_id: r1.id)
+	          Loser.create(user_id: 1, restaurant_id: r2.id)
+	        elsif input == '2'
+	          winner = challenger
+	          Winner.create(user_id: 1, restaurant_id: r2.id)
+	          Loser.create(user_id: 1, restaurant_id: r1.id)
+	        end
+	      self.url = winner[:url]
+	  end
+
+	  puts "We recommend you go to " + "#{winner[:title]}".green + "!"        
   end
 
   def satisfied

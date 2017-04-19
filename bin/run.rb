@@ -15,6 +15,6 @@ puts "What are you lookin' for?"
 term = gets.chomp
 #binding.pry
 
-new_game = Mealee.new
-new_game.search(term, location)
+new_game = Mealee.new(term, location)
+new_game.search
 
