@@ -9,3 +9,6 @@ user_term = CLI.enter_term
 new_game = Mealee.new(user_term, user_location)
 new_game.search
 
+
+# comment
+
