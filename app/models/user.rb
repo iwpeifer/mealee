@@ -5,11 +5,19 @@ has_many :restaurants, through: :winners
 has_many :restaurants, through: :losers
 
 def best_rankings
-    binding.pry
+    self.winners
+end
+
+def favorite
+
 end
 
 def worst_rankings
     binding.pry
+end
+
+def least_favorite
+
 end
 
 
