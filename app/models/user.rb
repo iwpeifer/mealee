@@ -5,7 +5,7 @@ has_many :restaurants, through: :winners
 has_many :restaurants, through: :losers
 
 def best_rankings
-    self.winners
+    self.winners.collect {|w| w.restaurant}
 end
 
 def favorite
