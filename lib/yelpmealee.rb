@@ -53,10 +53,11 @@ class Mealee
     rest["businesses"].each {|x| 
 
     restaurant = {}
-    restaurant[:title] = x["name"].underline
+    restaurant[:name] = x["name"].underline
     restaurant[:rating] = "#{x["rating"]} based on #{x["review_count"]} reviews" 
+    restaurant[:review_count] = x["review_count"]
     restaurant[:location] = x["location"]["display_address"].join(", ").to_s
-    restaurant[:categories] = x["categories"].collect {|y| y["title"]}.join(", ").to_s
+    restaurant[:category] = x["categories"].collect {|y| y["title"]}.join(", ").to_s
     #binding.pry #########
     restaurant[:distance] = "#{(x["distance"]/100).round} minute walk"
     restaurant[:price] = "#{x["price"]}"
@@ -127,17 +128,38 @@ class Mealee
           end
           
           if input == '1!' || input == '2!'
-            winner = winner if input == '1!'
-            winner = challenger if input == '2!'
-            self.url = winner[:url]
+            r1 = Restaurant.find_or_create_by(name: winner[:name].uncolorize, location: winner[:location], category: winner[:category], price: winner[:price])
+            r2 = Restaurant.find_or_create_by(name: challenger[:name].uncolorize, location: challenger[:location], category: challenger[:category], price: challenger[:price])
+            
+            if input == '1!'
+              winner = winner
+              Winner.create(user_id: 1, restaurant_id: r1.id)
+              Loser.create(user_id: 1, restaurant_id: r2.id)
+            elsif input == '2!'
+              winner = challenger
+              Winner.create(user_id: 1, restaurant_id: r2.id)
+              Loser.create(user_id: 1, restaurant_id: r1.id)
+            end
+            self.url = winner[:url]            
+            #binding.pry
             break
           end
 
           ten_options.reject! {|x| x == winner} if input == 2.to_s
           ten_options.reject! {|x| x == challenger} if input == 1.to_s
 
-          winner = winner if input == 1.to_s
-          winner = challenger if input == 2.to_s
+          r1 = Restaurant.find_or_create_by(name: winner[:name].uncolorize, location: winner[:location], category: winner[:category], price: winner[:price])
+          r2 = Restaurant.find_or_create_by(name: challenger[:name].uncolorize, location: challenger[:location], category: challenger[:category], price: challenger[:price])
+          
+          if input == '1'
+              winner = winner
+              Winner.create(user_id: 1, restaurant_id: r1.id)
+              Loser.create(user_id: 1, restaurant_id: r2.id)
+            elsif input == '2'
+              winner = challenger
+              Winner.create(user_id: 1, restaurant_id: r2.id)
+              Loser.create(user_id: 1, restaurant_id: r1.id)
+            end
           self.url = winner[:url]
       end
 
