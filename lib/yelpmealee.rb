@@ -14,54 +14,43 @@ class Mealee
   DEFAULT_LOCATION = "11 Broadway, New York, NY"
   SEARCH_LIMIT = 40
 
-  attr_accessor :url, :options, :search_url, :search_params, :user
+  attr_accessor :url, :options, :search_url, :search_params, :user, :results, :set_of_ten, :set_of_ten_dup, :winner, :challenger, :loser
 
 	#connect to Yelp API then collect businesses for game
 	
   def populate_options
-  	response = HTTP.auth(self.bearer_token).get(search_url, params: search_params).parse
-    create_restaurants(response)
-  end
+  	self.results = HTTP.auth(self.bearer_token).get(search_url, params: search_params).parse
+end
 
-  def create_restaurants(results)
-      results["businesses"].each do |x| 
-	      restaurant = {}
-	      restaurant[:name] = x["name"].underline
-	      restaurant[:rating] = "#{x["rating"]} based on #{x["review_count"]} reviews" 
-	      restaurant[:review_count] = x["review_count"]
-	      restaurant[:location] = x["location"]["display_address"].join(", ").to_s
-	      restaurant[:category] = x["categories"].collect {|y| y["title"]}.join(", ").to_s
-	      restaurant[:distance] = "#{(x["distance"]/100).round} minute walk"
-	      restaurant[:price] = "#{x["price"]}"
-	      restaurant[:url] = x["url"]
+  def create_restaurants
+      self.results["businesses"].each do |x| 
+	      restaurant = {
+					name: x["name"].underline,
+					rating: "#{x["rating"]} based on #{x["review_count"]} reviews", 
+					review_count: x["review_count"],
+					location: x["location"]["display_address"].join(", ").to_s,
+					category: x["categories"].collect {|y| y["title"]}.join(", ").to_s,
+					distance: "#{(x["distance"]/100).round} minute walk",
+					price: "#{x["price"]}",
+					url: x["url"]
+				}
 	      self.options << restaurant
     	end
+
   end
 
-  def search
-    populate_options
+  def choose_ten
+		self.set_of_ten = self.options.sample(10)
+		#binding.pry
+		self.set_of_ten_dup = self.set_of_ten.dup
+	end
 
-    answer = 2
-    until answer == 1
-			#binding.pry
-	    options_set = options.sample(10)
-			#binding.pry
-	    ten_options = options_set.dup
-			#binding.pry
-	    self.choose_ten(ten_options)
-	    answer = self.satisfied
-	    options.reject!{|x| options_set.include? x}
-    end
-    goodbye
-  end
-
-  def ran_out_of_options?
-  	self.options.length <= 1
-  end
-  
-
+	def take_out_losers
+		self.options.reject!{|x| self.set_of_ten.include? x}
+	end
+	
 	#main display method - acceptts ten business options and runs through match ups until user chooses or options run out
-  def choose_ten(ten_options)
+  def play
 
 		if ran_out_of_options?
   			puts "SORRY, YOU ARE HOPELESSLY INDECISIVE".red.blink
@@ -69,10 +58,10 @@ class Mealee
   	end
 
 		#select first option in match up. -- FIRST LOOP ONLY
-		winner = select_winner(ten_options)
+		winner = select_winner
 
-	  until ten_options.length == 1 do
-				challenger = select_challenger(winner, ten_options)
+	  until self.set_of_ten_dup.length == 1 do
+				challenger = select_challenger(winner)
 	      
 	      system "clear"
 
@@ -88,7 +77,7 @@ class Mealee
 				
 	      self.url = winner[:url]
 
-				remove_from_match_options(winner, challenger, ten_options, input)
+				remove_from_match_options(winner, challenger, input)
 	  end
 	  puts "We recommend you go to " + "#{winner[:name]}".green + "!" 
   end
@@ -122,16 +111,17 @@ class Mealee
 		goodbye if gets.chomp == 'exit'
 	end
 	
-	def select_winner(ten_options)
-		winner = ten_options.sample
+	def select_winner
+		
+		winner = self.set_of_ten_dup.sample
 	  self.url = winner[:url]
 		winner
 	end
 
-	def select_challenger(winner, ten_options)
-		  challenger = ten_options.sample
+	def select_challenger(winner)
+		  challenger = self.set_of_ten_dup.sample
 			until challenger != winner do
-					challenger = ten_options.sample
+					challenger = self.set_of_ten_dup.sample
 			end
 			challenger
 	end
@@ -156,14 +146,15 @@ class Mealee
 		input
 	end
 	
-	def remove_from_match_options(winner, challenger, ten_options, input)
-		ten_options.reject! {|x| x == winner} if input == 2.to_s
-		ten_options.reject! {|x| x == challenger} if input == 1.to_s
-		ten_options
+	def remove_from_match_options(winner, challenger, input)
+		self.set_of_ten_dup.reject! {|x| x == winner} if input == 2.to_s
+		self.set_of_ten_dup.reject! {|x| x == challenger} if input == 1.to_s
+		self.set_of_ten_dup
 	end
 
-	
-
+  def ran_out_of_options?
+  	self.options.length <= 1
+  end
 	
   def satisfied
     puts "Are you happy with your recommendation? (" + "Yes".green + " or " + "No".red + ")"
@@ -171,16 +162,15 @@ class Mealee
     # binding.pry #####################
     if choice == "yes"
       Launchy.open(self.url)
-			goodbye
       return 1
     else
       puts "Would you like another ten options? (" + "Yes".green + " or " + "No".red + ")"
       choice = gets.chomp.downcase
       if choice == "yes"
-      return 2
+      return nil
     else 
       return 1
-			goodbye			
+						
     end
   end
 end

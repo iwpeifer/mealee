@@ -9,8 +9,19 @@ user_location = u.user_location
 user_term = CLI.enter_term
 new_game = Mealee.new(user_term, user_location, u)
 
-new_game.search
+new_game.populate_options
+#binding.pry
+new_game.create_restaurants
+#binding.pry
 
+answer = nil
+until !answer.nil?  
+    new_game.choose_ten
+    new_game.play
+    new_game.take_out_losers
+    answer = new_game.satisfied
+end
 
-# comment
+new_game.goodbye
+
 
