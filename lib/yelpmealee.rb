@@ -59,6 +59,7 @@ class Mealee
 
   def populate_options
   	response = HTTP.auth(self.bearer_token).get(search_url, params: search_params).parse
+
     create_restaurants(response)
   end
 
@@ -77,99 +78,138 @@ class Mealee
 	    answer = self.satisfied
 	    options.reject!{|x| options_set.include? x}
     end
-    puts "Thanks for using Mealee" 
+    goodbye
   end
 
+	def add_businesses(winner, challenger)
+		r1 = Restaurant.find_or_create_by(name: winner[:name].uncolorize, location: winner[:location], category: winner[:category], price: winner[:price])
+	  r2 = Restaurant.find_or_create_by(name: challenger[:name].uncolorize, location: challenger[:location], category: challenger[:category], price: challenger[:price])
+		[r1, r2]
+	end
+
+	def add_to_winner_loser_tables(winner,loser)
+		Winner.create(user_id: self.user.id, restaurant_id: winner.id)
+	  Loser.create(user_id: self.user.id, restaurant_id: loser.id)      
+	end
+
+	def choiceprompt
+		puts " "
+		puts "Please choose option 1 or 2. Type '1!' or '2!' if you've found on a winner."
+	  puts "Type 'more' to see Yelp pages. You can also type 'help' or 'exit'"
+		puts " "
+	end
+	
+	def goodbye
+		puts "  "
+		puts "Thanks for using Mealee!"
+		puts "  "
+		exit
+	end
+
+	def help
+		system "clear"
+		puts " "
+		puts "      Mealee is designed to help the indecisive among us and is built using the Yelp Fusion API.  Mealee pulls local business data and puts businesses side by side, allowing the user to narrow their choices until they find a business they would like to go to.  To use, enter your zip code or address, then enter what you are interested in searching for.  Search broadly for things like 'dinner' or 'museums,' or more specifically for type of cuisine or business type."
+		puts " "
+		puts "Press 'Enter' to continue or type 'exit' to end the program."
+		goodbye if gets.chomp == 'exit'
+	end
+	
+	def select_winner(ten_options)
+		winner = ten_options.sample
+	  self.url = winner[:url]
+		winner
+	end
+
+	def select_challenger(winner, ten_options)
+		  challenger = ten_options.sample
+			until challenger != winner do
+					challenger = ten_options.sample
+			end
+			challenger
+	end
+
+	def input_prompt(winner, challenger)
+		input = 0
+		until input == "1" || input == "2" || input == "1!" || input == "2!" do
+				choiceprompt
+				input = gets.chomp.downcase
+				if input == "exit" 
+					goodbye
+				elsif input == "help"
+					help
+					display_choices(winner, challenger)
+				elsif input == "more"
+					Launchy.open(winner[:url])
+					Launchy.open(challenger[:url])
+					system "clear"
+					display_choices(winner, challenger)
+				end
+		end
+		input
+	end
+	
+	def remove_from_match_options(winner, challenger, ten_options, input)
+		ten_options.reject! {|x| x == winner} if input == 2.to_s
+		ten_options.reject! {|x| x == challenger} if input == 1.to_s
+		ten_options
+	end
+
+	#main display method - acceptts ten business options and runs through match ups until user chooses or options run out
   def choose_ten(ten_options)
 
-  	if ran_out_of_options?
-  		puts "SORRY, YOU ARE HOPELESSLY INDECISIVE".red.blink
-  		exit
+		if ran_out_of_options?
+  			puts "SORRY, YOU ARE HOPELESSLY INDECISIVE".red.blink
+  			exit
   	end
 
-	  winner = ten_options.sample
-	  self.url = winner[:url]
-	  until ten_options.length == 1 do
-	      challenger = ten_options.sample
-	      until challenger != winner do
-	          challenger = ten_options.sample
-	      end
+		#select first option in match up. -- FIRST LOOP ONLY
+		winner = select_winner(ten_options)
 
+		#match up loop -- until ten_options variable is down to 1
+	  until ten_options.length == 1 do
+
+				#select second option in match up
+				challenger = select_challenger(winner, ten_options)
+	      
 	      system "clear"
 
-	      display_choices(winner, challenger)
-
-	      input = 0
-	      until input == "1" || input == "2" || input == "1!" || input == "2!" do
-	          puts "Please choose option 1 or 2. Type '1!' or '2!' if you've found on a winner. You can also type 'help' or 'exit'"
-	          puts "Type 'more' to see Yelp pages"
-	          puts "   "
-	          input = gets.chomp.downcase
-	          if input == "exit" 
-	            puts "   "
-	            puts "Thanks for playing!"
-	            exit
-	          elsif input == "help"
-	            puts "   "
-	            puts "      Mealee is designed to help the indecisive among us and is built using the Yelp Fusion API.  Mealee pulls local business data and puts businesses side by side, allowing the user to narrow their choices until they find a business they would like to go to.  To use, enter your zip code or address, then enter what you are interested in searching for.  Search broadly for things like 'dinner' or 'museums,' or more specifically for type of cuisine or business type."
-	            puts "   "
-	            puts "---"
-	            display_choices(winner, challenger)
-	            puts "---"
-	            puts "   "
-	          elsif input == "more"
-	            Launchy.open(winner[:url])
-	            Launchy.open(challenger[:url])
-	          end
-
-	      end
+			  display_choices(winner, challenger)
+				input = input_prompt(winner, challenger)
 	      
-	      if input == '1!' || input == '2!'
-	        r1 = Restaurant.find_or_create_by(name: winner[:name].uncolorize, location: winner[:location], category: winner[:category], price: winner[:price])
-	        r2 = Restaurant.find_or_create_by(name: challenger[:name].uncolorize, location: challenger[:location], category: challenger[:category], price: challenger[:price])
-	        
-	        if input == '1!'
-	          winner = winner
-	          Winner.create(user_id: 1, restaurant_id: r1.id)
-	          Loser.create(user_id: 1, restaurant_id: r2.id)
-	        elsif input == '2!'
-	          winner = challenger
-	          Winner.create(user_id: 1, restaurant_id: r2.id)
-	          Loser.create(user_id: 1, restaurant_id: r1.id)
-	        end
-	        self.url = winner[:url]            
-	        #binding.pry
-	        break
-	      end
+				match_arr = add_businesses(winner,challenger)
 
-	      ten_options.reject! {|x| x == winner} if input == 2.to_s
-	      ten_options.reject! {|x| x == challenger} if input == 1.to_s
-
-	      r1 = Restaurant.find_or_create_by(name: winner[:name].uncolorize, location: winner[:location], category: winner[:category], price: winner[:price])
-	      r2 = Restaurant.find_or_create_by(name: challenger[:name].uncolorize, location: challenger[:location], category: challenger[:category], price: challenger[:price])
-	      
-	      if input == '1'
+					
+					if input == '1'
 	          winner = winner
-	          Winner.create(user_id: self.user.id, restaurant_id: r1.id)
-	          Loser.create(user_id: self.user.id, restaurant_id: r2.id)
+						add_to_winner_loser_tables(match_arr[0],match_arr[1])
 	        elsif input == '2'
 	          winner = challenger
-	          Winner.create(user_id: self.user.id, restaurant_id: r2.id)
-	          Loser.create(user_id: self.user.id, restaurant_id: r1.id)
-	        end
+						add_to_winner_loser_tables(match_arr[1],match_arr[0])
+	          elsif input == '1!'
+						add_to_winner_loser_tables(match_arr[0],match_arr[1])
+						break
+	        elsif input == '2!'
+						add_to_winner_loser_tables(match_arr[1],match_arr[0])
+						winner = challenger
+						break
+	        end          
+
 	      self.url = winner[:url]
-			#	binding.pry
+				remove_from_match_options(winner, challenger, ten_options, input)
 	  end
-		#	binding.pry
-	  puts "We recommend you go to " + "#{winner[:name]}".green + "!"        
+	  puts "We recommend you go to " + "#{winner[:name]}".green + "!" 
   end
 
+
+	
   def satisfied
     puts "Are you happy with your recommendation? (" + "Yes".green + " or " + "No".red + ")"
     choice = gets.chomp.downcase
     # binding.pry #####################
     if choice == "yes"
       Launchy.open(self.url)
+			goodbye
       return 1
     else
       puts "Would you like another ten options? (" + "Yes".green + " or " + "No".red + ")"
@@ -178,6 +218,7 @@ class Mealee
       return 2
     else 
       return 1
+			goodbye			
     end
   end
 end
