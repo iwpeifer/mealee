@@ -16,30 +16,11 @@ class Mealee
 
   attr_accessor :url, :options, :search_url, :search_params, :user
 
-  def initialize(term, location, user)
-		@user = user
-    @url = nil
-    @options = []
-    @search_url = "#{API_HOST}#{SEARCH_PATH}"
-    @search_params = {term: term, location: location, limit: SEARCH_LIMIT}
-  end
-  
-  def bearer_token
-    url = "#{API_HOST}#{TOKEN_PATH}"
-
-    raise "Please set your CLIENT_ID" if CLIENT_ID.nil?
-    raise "Please set your CLIENT_SECRET" if CLIENT_SECRET.nil?
-
-    params = {
-      client_id: 'ZCnzIJoSgo8zjWL8uz68fw',
-      client_secret: 'HFe3UgFsaDsL1isRH4Hu87RlYlGOOkTXApkkdLmtlogR9Qt4dsqWYo5PTyeJBtWn',
-      grant_type: 'client_credentials'
-    }
-
-    response = HTTP.post(url, params: params)
-    parsed = response.parse
-
-    "#{parsed['token_type']} #{parsed['access_token']}"
+	#connect to Yelp API then collect businesses for game
+	
+  def populate_options
+  	response = HTTP.auth(self.bearer_token).get(search_url, params: search_params).parse
+    create_restaurants(response)
   end
 
   def create_restaurants(results)
@@ -57,29 +38,61 @@ class Mealee
     	end
   end
 
-  def populate_options
-  	response = HTTP.auth(self.bearer_token).get(search_url, params: search_params).parse
-
-    create_restaurants(response)
-  end
-
-  def ran_out_of_options?
-  	self.options.length <= 1
-  end
-
   def search
     populate_options
 
     answer = 2
     until answer == 1
+			#binding.pry
 	    options_set = options.sample(10)
+			#binding.pry
 	    ten_options = options_set.dup
+			#binding.pry
 	    self.choose_ten(ten_options)
 	    answer = self.satisfied
 	    options.reject!{|x| options_set.include? x}
     end
     goodbye
   end
+
+  def ran_out_of_options?
+  	self.options.length <= 1
+  end
+  
+
+	#main display method - acceptts ten business options and runs through match ups until user chooses or options run out
+  def choose_ten(ten_options)
+
+		if ran_out_of_options?
+  			puts "SORRY, YOU ARE HOPELESSLY INDECISIVE".red.blink
+  			exit
+  	end
+
+		#select first option in match up. -- FIRST LOOP ONLY
+		winner = select_winner(ten_options)
+
+	  until ten_options.length == 1 do
+				challenger = select_challenger(winner, ten_options)
+	      
+	      system "clear"
+
+			  display_choices(winner, challenger)
+				input = input_prompt(winner, challenger)
+	      
+				match_arr = add_businesses(winner,challenger)
+
+				add_to_winner_loser_tables(match_arr[0],match_arr[1]) if input == '1' || input == '1!'
+				add_to_winner_loser_tables(match_arr[1],match_arr[0]) if input == '2' || input == '2!'
+				winner = challenger if input == '2' || input == '2!'
+				break if input == '1!' || input == '2!'
+				
+	      self.url = winner[:url]
+
+				remove_from_match_options(winner, challenger, ten_options, input)
+	  end
+	  puts "We recommend you go to " + "#{winner[:name]}".green + "!" 
+  end
+
 
 	def add_businesses(winner, challenger)
 		r1 = Restaurant.find_or_create_by(name: winner[:name].uncolorize, location: winner[:location], category: winner[:category], price: winner[:price])
@@ -93,24 +106,18 @@ class Mealee
 	end
 
 	def choiceprompt
-		puts " "
-		puts "Please choose option 1 or 2. Type '1!' or '2!' if you've found on a winner."
-	  puts "Type 'more' to see Yelp pages. You can also type 'help' or 'exit'"
-		puts " "
+		puts "\nPlease choose option 1 or 2. Type '1!' or '2!' if you've found on a winner."
+	  puts "Type 'more' to see Yelp pages. You can also type 'help' or 'exit'\n"
 	end
 	
 	def goodbye
-		puts "  "
-		puts "Thanks for using Mealee!"
-		puts "  "
+		puts "\nThanks for using Mealee!\n"
 		exit
 	end
 
 	def help
 		system "clear"
-		puts " "
-		puts "      Mealee is designed to help the indecisive among us and is built using the Yelp Fusion API.  Mealee pulls local business data and puts businesses side by side, allowing the user to narrow their choices until they find a business they would like to go to.  To use, enter your zip code or address, then enter what you are interested in searching for.  Search broadly for things like 'dinner' or 'museums,' or more specifically for type of cuisine or business type."
-		puts " "
+		puts "\n        Mealee is designed to help the indecisive among us and is built using the Yelp Fusion API.  Mealee pulls local business data and puts businesses side by side, allowing the user to narrow their choices until they find a business they would like to go to.  To use, enter your zip code or address, then enter what you are interested in searching for.  Search broadly for things like 'dinner' or 'museums,' or more specifically for type of cuisine or business type.\n"
 		puts "Press 'Enter' to continue or type 'exit' to end the program."
 		goodbye if gets.chomp == 'exit'
 	end
@@ -155,52 +162,7 @@ class Mealee
 		ten_options
 	end
 
-	#main display method - acceptts ten business options and runs through match ups until user chooses or options run out
-  def choose_ten(ten_options)
-
-		if ran_out_of_options?
-  			puts "SORRY, YOU ARE HOPELESSLY INDECISIVE".red.blink
-  			exit
-  	end
-
-		#select first option in match up. -- FIRST LOOP ONLY
-		winner = select_winner(ten_options)
-
-		#match up loop -- until ten_options variable is down to 1
-	  until ten_options.length == 1 do
-
-				#select second option in match up
-				challenger = select_challenger(winner, ten_options)
-	      
-	      system "clear"
-
-			  display_choices(winner, challenger)
-				input = input_prompt(winner, challenger)
-	      
-				match_arr = add_businesses(winner,challenger)
-
-					
-					if input == '1'
-	          winner = winner
-						add_to_winner_loser_tables(match_arr[0],match_arr[1])
-	        elsif input == '2'
-	          winner = challenger
-						add_to_winner_loser_tables(match_arr[1],match_arr[0])
-	          elsif input == '1!'
-						add_to_winner_loser_tables(match_arr[0],match_arr[1])
-						break
-	        elsif input == '2!'
-						add_to_winner_loser_tables(match_arr[1],match_arr[0])
-						winner = challenger
-						break
-	        end          
-
-	      self.url = winner[:url]
-				remove_from_match_options(winner, challenger, ten_options, input)
-	  end
-	  puts "We recommend you go to " + "#{winner[:name]}".green + "!" 
-  end
-
+	
 
 	
   def satisfied
@@ -234,6 +196,32 @@ end
     puts "-------".red + " 2 ".white.on_red.blink + "------------------------".red
     format(challenger)
     puts "----------------------------------"
+  end
+
+	def initialize(term, location, user)
+		@user = user
+    @url = nil
+    @options = []
+    @search_url = "#{API_HOST}#{SEARCH_PATH}"
+    @search_params = {term: term, location: location, limit: SEARCH_LIMIT}
+  end
+  
+  def bearer_token
+    url = "#{API_HOST}#{TOKEN_PATH}"
+
+    raise "Please set your CLIENT_ID" if CLIENT_ID.nil?
+    raise "Please set your CLIENT_SECRET" if CLIENT_SECRET.nil?
+
+    params = {
+      client_id: 'ZCnzIJoSgo8zjWL8uz68fw',
+      client_secret: 'HFe3UgFsaDsL1isRH4Hu87RlYlGOOkTXApkkdLmtlogR9Qt4dsqWYo5PTyeJBtWn',
+      grant_type: 'client_credentials'
+    }
+
+    response = HTTP.post(url, params: params)
+    parsed = response.parse
+
+    "#{parsed['token_type']} #{parsed['access_token']}"
   end
 
 end
