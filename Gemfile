@@ -7,7 +7,7 @@ gem "pry"
 #gem "command_line_reporter", '>=3.0'
 gem "colorize"
 gem "activerecord"
-
+gem 'pg'
 gem "rake"
 gem 'launchy', '~> 2.4', '>= 2.4.3'
 gem 'sinatra-activerecord'
@@ -16,6 +16,4 @@ gem 'sinatra-activerecord'
 #     gem 'sqlite3', '1.3.13'
 # end
 
-group :production do
-    gem 'pg'
-end
+
