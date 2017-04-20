@@ -29,19 +29,19 @@ def user_location
 end
 
 def best_rankings
-    self.winners.collect {|w| w.restaurant}
+    puts self.winners.group(:restaurant_id).count.map {|k,v| "#{v} #{Restaurant.find(k).name}"}.sort.reverse.take(10)
 end
 
 def favorite
-
+	puts self.winners.group(:restaurant_id).count.map {|k,v| "#{v} #{Restaurant.find(k).name}"}.sort.reverse.take(1)
 end
 
 def worst_rankings
-    binding.pry
+    puts self.losers.group(:restaurant_id).count.map {|k,v| "#{v} #{Restaurant.find(k).name}"}.sort.reverse.take(10)
 end
 
 def least_favorite
-
+	puts self.losers.group(:restaurant_id).count.map {|k,v| "#{v} #{Restaurant.find(k).name}"}.sort.reverse.take(1)
 end
 
 end

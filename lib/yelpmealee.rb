@@ -14,9 +14,10 @@ class Mealee
   DEFAULT_LOCATION = "11 Broadway, New York, NY"
   SEARCH_LIMIT = 40
 
-  attr_accessor :url, :options, :search_url, :search_params
+  attr_accessor :url, :options, :search_url, :search_params, :user
 
-  def initialize(term, location)
+  def initialize(term, location, user)
+		@user = user
     @url = nil
     @options = []
     @search_url = "#{API_HOST}#{SEARCH_PATH}"
@@ -149,17 +150,18 @@ class Mealee
 	      
 	      if input == '1'
 	          winner = winner
-	          Winner.create(user_id: 1, restaurant_id: r1.id)
-	          Loser.create(user_id: 1, restaurant_id: r2.id)
+	          Winner.create(user_id: self.user.id, restaurant_id: r1.id)
+	          Loser.create(user_id: self.user.id, restaurant_id: r2.id)
 	        elsif input == '2'
 	          winner = challenger
-	          Winner.create(user_id: 1, restaurant_id: r2.id)
-	          Loser.create(user_id: 1, restaurant_id: r1.id)
+	          Winner.create(user_id: self.user.id, restaurant_id: r2.id)
+	          Loser.create(user_id: self.user.id, restaurant_id: r1.id)
 	        end
 	      self.url = winner[:url]
+			#	binding.pry
 	  end
-
-	  puts "We recommend you go to " + "#{winner[:title]}".green + "!"        
+		#	binding.pry
+	  puts "We recommend you go to " + "#{winner[:name]}".green + "!"        
   end
 
   def satisfied
