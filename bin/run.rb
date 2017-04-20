@@ -10,9 +10,8 @@ user_term = CLI.enter_term
 new_game = Mealee.new(user_term, user_location, u)
 
 new_game.populate_options
-#binding.pry
 new_game.create_restaurants
-#binding.pry
+
 
 answer = nil
 until !answer.nil?  

@@ -20,7 +20,7 @@ class Mealee
 	
   def populate_options
   	self.results = HTTP.auth(self.bearer_token).get(search_url, params: search_params).parse
-end
+	end
 
   def create_restaurants
       self.results["businesses"].each do |x| 
@@ -36,12 +36,10 @@ end
 				}
 	      self.options << restaurant
     	end
-
   end
 
   def choose_ten
 		self.set_of_ten = self.options.sample(10)
-		#binding.pry
 		self.set_of_ten_dup = self.set_of_ten.dup
 	end
 
@@ -57,41 +55,41 @@ end
   			exit
   	end
 
-		#select first option in match up. -- FIRST LOOP ONLY
-		winner = select_winner
+		@winner = select_winner
 
 	  until self.set_of_ten_dup.length == 1 do
-				challenger = select_challenger(winner)
+				@challenger = select_challenger
 	      
 	      system "clear"
 
-			  display_choices(winner, challenger)
-				input = input_prompt(winner, challenger)
+				
+			  display_choices
+				input = input_prompt
 	      
-				match_arr = add_businesses(winner,challenger)
+				match_arr = add_businesses
 
 				add_to_winner_loser_tables(match_arr[0],match_arr[1]) if input == '1' || input == '1!'
 				add_to_winner_loser_tables(match_arr[1],match_arr[0]) if input == '2' || input == '2!'
-				winner = challenger if input == '2' || input == '2!'
+				@winner = @challenger if input == '2' || input == '2!'
 				break if input == '1!' || input == '2!'
 				
-	      self.url = winner[:url]
+	      self.url = @winner[:url]
 
-				remove_from_match_options(winner, challenger, input)
+				remove_from_match_options(input)
 	  end
-	  puts "We recommend you go to " + "#{winner[:name]}".green + "!" 
+	  puts "We recommend you go to " + "#{@winner[:name]}".green + "!" 
   end
 
 
-	def add_businesses(winner, challenger)
-		r1 = Restaurant.find_or_create_by(name: winner[:name].uncolorize, location: winner[:location], category: winner[:category], price: winner[:price])
-	  r2 = Restaurant.find_or_create_by(name: challenger[:name].uncolorize, location: challenger[:location], category: challenger[:category], price: challenger[:price])
+	def add_businesses
+		r1 = Restaurant.find_or_create_by(name: @winner[:name].uncolorize, location: @winner[:location], category: @winner[:category], price: @winner[:price])
+	  r2 = Restaurant.find_or_create_by(name: @challenger[:name].uncolorize, location: @challenger[:location], category: @challenger[:category], price: @challenger[:price])
 		[r1, r2]
 	end
 
-	def add_to_winner_loser_tables(winner,loser)
-		Winner.create(user_id: self.user.id, restaurant_id: winner.id)
-	  Loser.create(user_id: self.user.id, restaurant_id: loser.id)      
+	def add_to_winner_loser_tables(w,l)
+		Winner.create(user_id: self.user.id, restaurant_id: w.id)
+	  Loser.create(user_id: self.user.id, restaurant_id: l.id)      
 	end
 
 	def choiceprompt
@@ -113,20 +111,20 @@ end
 	
 	def select_winner
 		
-		winner = self.set_of_ten_dup.sample
-	  self.url = winner[:url]
-		winner
+		@winner = self.set_of_ten_dup.sample
+	  self.url = @winner[:url]
+		@winner
 	end
 
-	def select_challenger(winner)
-		  challenger = self.set_of_ten_dup.sample
-			until challenger != winner do
-					challenger = self.set_of_ten_dup.sample
+	def select_challenger
+		  @challenger = self.set_of_ten_dup.sample
+			until @challenger != @winner do
+					@challenger = self.set_of_ten_dup.sample
 			end
-			challenger
+			@challenger			
 	end
 
-	def input_prompt(winner, challenger)
+	def input_prompt
 		input = 0
 		until input == "1" || input == "2" || input == "1!" || input == "2!" do
 				choiceprompt
@@ -135,21 +133,20 @@ end
 					goodbye
 				elsif input == "help"
 					help
-					display_choices(winner, challenger)
+					display_choices
 				elsif input == "more"
-					Launchy.open(winner[:url])
-					Launchy.open(challenger[:url])
+					Launchy.open(@winner[:url])
+					Launchy.open(@challenger[:url])
 					system "clear"
-					display_choices(winner, challenger)
+					display_choices
 				end
 		end
 		input
 	end
 	
-	def remove_from_match_options(winner, challenger, input)
-		self.set_of_ten_dup.reject! {|x| x == winner} if input == 2.to_s
-		self.set_of_ten_dup.reject! {|x| x == challenger} if input == 1.to_s
-		self.set_of_ten_dup
+	def remove_from_match_options(input)
+		self.set_of_ten_dup.reject! {|x| x == @winner} if input == 2.to_s
+		self.set_of_ten_dup.reject! {|x| x == @challenger} if input == 1.to_s
 	end
 
   def ran_out_of_options?
@@ -170,7 +167,6 @@ end
       return nil
     else 
       return 1
-						
     end
   end
 end
@@ -180,11 +176,11 @@ end
     array.each {|key, value| printf "%-#{longest_key.length}s %s\n", key, value if key != :url}
   end
 
-  def display_choices(winner, challenger)
+  def display_choices
     puts "-------".blue + " 1 ".white.on_blue.blink + "------------------------".blue
-    format(winner)
+    format(@winner)
     puts "-------".red + " 2 ".white.on_red.blink + "------------------------".red
-    format(challenger)
+    format(@challenger)
     puts "----------------------------------"
   end
 
