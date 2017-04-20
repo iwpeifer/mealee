@@ -93,7 +93,7 @@ class Mealee
 
 	def choiceprompt
 		puts "\nPlease choose option" + " 1 ".blue + "or" + " 2".red + ".\nType" + " '1!' ".blue + "or" + " '2!' ".red + "if you've found on a winner."
-	  puts "Type" + " 'more' ".yellow + "to see Yelp pages. You can also type 'help' or 'exit'\n"
+	  puts "Type" + " 'more' ".yellow + "to see Yelp pages.\n You can also type 'help' or 'exit'\n"
 	end
 	
 	def goodbye
@@ -104,7 +104,8 @@ class Mealee
 	def help
 		system "clear"
 		puts "\n        Mealee is designed to help the indecisive among us and is built using the Yelp Fusion API.  Mealee pulls local business data and puts businesses side by side, allowing the user to narrow their choices until they find a business they would like to go to.  To use, enter your zip code or address, then enter what you are interested in searching for.  Search broadly for things like 'dinner' or 'museums,' or more specifically for type of cuisine or business type.\n"
-		puts "Press 'Enter' to continue or type 'exit' to end the program."
+		puts "\nThe yellow checkmark (" + "✔".yellow + ") indicates which option has won more total rounds between all users.\n"
+		puts "\nPress 'Enter' to continue or type 'exit' to end the program."
 		goodbye if gets.chomp == 'exit'
 	end
 	
