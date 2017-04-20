@@ -12,8 +12,8 @@ gem "rake"
 gem 'launchy', '~> 2.4', '>= 2.4.3'
 gem 'sinatra-activerecord'
 
-# group :development, :test do
-#     gem 'sqlite3', '1.3.13'
-# end
+group :development, :test do
+    gem 'sqlite3', '1.3.13'
+end
 
 
