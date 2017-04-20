@@ -42,11 +42,11 @@ def self.bottom_ten
 end
 
 def self.sort_top
-    self.all.sort_by {|res| res.ratio.to_i}.reverse.each_with_index.collect {|rest, i| "#{i+1}. #{rest.name}: #{rest.ratio}"}
+    self.all.sort_by {|res| res.ratio.to_i}.reverse.each_with_index.collect {|rest, i| "#{i+1}. #{rest.name}: #{rest.ratio} Win/Loss ratio"}
 end
 
 def self.sort_bottom
-    self.all.sort_by {|res| res.ratio.to_i}.each_with_index.collect {|rest, i| "#{i+1}. #{rest.name}: #{rest.ratio}"}
+    self.all.sort_by {|res| res.ratio.to_i}.each_with_index.collect {|rest, i| "#{i+1}. #{rest.name}: #{rest.ratio} Win/loss ratio"}
 end
 
 

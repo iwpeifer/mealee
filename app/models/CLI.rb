@@ -20,6 +20,25 @@ def self.enter_name
 	@name
 end
 
+def self.options(user)
+	choice = 0
+	until choice == "1"
+	puts ""
+	puts "Would you like to: 1. Play Mealee 2. View your top restaurants 3. View the community's top restaurants. Type 'exit' to quit."
+	choice = gets.chomp
+	if choice == "2"
+		puts ""
+		user.best_rankings
+	elsif choice == "3"
+		Restaurant.top_ten
+	elsif choice == "exit"
+		puts ""
+		puts "Thanks for playing!"
+		exit
+	end
+end
+end
+
 def self.enter_term
 	puts "What are you lookin' for?"
 	@term = gets.chomp
