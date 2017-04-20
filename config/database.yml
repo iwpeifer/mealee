@@ -1,2 +1,2 @@
-adapter: 'sqlite3'
-database: 'db/mealee_records.db'
+adapter: 'postgresql'
+database: 'db/mealee_records'

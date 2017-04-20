@@ -1,7 +1,7 @@
 class ConnectionAdapter
   attr_reader :adapter, :database
 
-  def initialize(database, adapter="sqlite3")
+  def initialize(database, adapter="postgres")
     @adapter = adapter
     @database = database
   end
