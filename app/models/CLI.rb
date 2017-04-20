@@ -24,7 +24,7 @@ def self.options(user)
 	choice = 0
 	until choice == "1"
 	puts ""
-	puts "Would you like to: 1. Play Mealee 2. View your top restaurants 3. View the community's top restaurants. Type 'exit' to quit."
+	puts "Would you like to:\n1. Play Mealee\n2. View your top restaurants\n3. View the community's top restaurants\n\nType 'exit' to quit."
 	choice = gets.chomp
 	if choice == "2"
 		puts ""

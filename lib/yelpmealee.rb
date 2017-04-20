@@ -73,9 +73,10 @@ end
 				add_to_winner_loser_tables(match_arr[0],match_arr[1]) if input == '1' || input == '1!'
 				add_to_winner_loser_tables(match_arr[1],match_arr[0]) if input == '2' || input == '2!'
 				winner = challenger if input == '2' || input == '2!'
+				self.url = winner[:url]
 				break if input == '1!' || input == '2!'
 				
-	      self.url = winner[:url]
+	      # self.url = winner[:url]
 
 				remove_from_match_options(winner, challenger, input)
 	  end
@@ -95,8 +96,8 @@ end
 	end
 
 	def choiceprompt
-		puts "\nPlease choose option 1 or 2. Type '1!' or '2!' if you've found on a winner."
-	  puts "Type 'more' to see Yelp pages. You can also type 'help' or 'exit'\n"
+		puts "\nPlease choose option" + " 1 ".blue + "or" + " 2".red + ".\nType" + " '1!' ".blue + "or" + " '2!' ".red + "if you've found on a winner."
+	  puts "Type" + " 'more' ".yellow + "to see Yelp pages. You can also type 'help' or 'exit'\n"
 	end
 	
 	def goodbye
@@ -170,20 +171,24 @@ end
       return nil
     else 
       return 1
-						
     end
   end
 end
 
   def format(array)
     longest_key = array.keys.max_by(&:length)
-    array.each {|key, value| printf "%-#{longest_key.length}s %s\n", key, value if key != :url}
+    array.each {|key, value| printf "%-#{longest_key.length}s %s\n", key, value if key != :url && key != :review_count}
   end
 
   def display_choices(winner, challenger)
-    puts "-------".blue + " 1 ".white.on_blue.blink + "------------------------".blue
+  	check1 = ""
+  	check2 = ""
+  	checkmark = check_wins(winner, challenger)
+  	checkmark == 1 ? check1 = '✔'.yellow : check1 = ""
+  	checkmark == 2 ? check2 = '✔'.yellow : check2 = ""
+    puts "-------".blue + " 1 ".white.on_blue.blink + "------------------------ ".blue + check1
     format(winner)
-    puts "-------".red + " 2 ".white.on_red.blink + "------------------------".red
+    puts "-------".red + " 2 ".white.on_red.blink + "------------------------ ".red + check2
     format(challenger)
     puts "----------------------------------"
   end
@@ -212,6 +217,28 @@ end
     parsed = response.parse
 
     "#{parsed['token_type']} #{parsed['access_token']}"
+  end
+
+  def check_wins(winner, challenger)
+  	#binding.pry
+  	winner_wins = 0
+  	challenger_wins = 0
+  	checkmark = nil
+  	if Restaurant.find_by(name: winner[:name].uncolorize)
+  		winner_wins = Restaurant.find_by(name: winner[:name].uncolorize).wins
+  	end
+  	if Restaurant.find_by(name: challenger[:name].uncolorize)
+  		challenger_wins = Restaurant.find_by(name: challenger[:name].uncolorize).wins
+  	end
+  	
+  	if winner_wins > challenger_wins
+  		checkmark = 1
+  	elsif challenger_wins > winner_wins
+  		checkmark = 2
+  	else
+  		checkmark = 0
+  	end
+  	checkmark
   end
 
 end
