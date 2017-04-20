@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170419131811) do
+ActiveRecord::Schema.define(version: 20170420165551) do
 
   create_table "losers", force: :cascade do |t|
     t.integer  "restaurant_id"
@@ -35,6 +35,8 @@ ActiveRecord::Schema.define(version: 20170419131811) do
     t.string "name"
     t.string "location"
     t.float  "min_rating"
+    t.float  "latitude"
+    t.float  "longitude"
   end
 
   create_table "winners", force: :cascade do |t|
