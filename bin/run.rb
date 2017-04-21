@@ -2,6 +2,7 @@ require_relative '../config/environment.rb'
 require_relative '../lib/yelpmealee.rb'
 
 CLI.intro_image
+CLI.welcome
 name = CLI.enter_name
 u = User.find_or_create_by(name: name)
 CLI.options(u)

@@ -58,23 +58,22 @@ class Mealee
 		@winner = select_winner
 
 	  until self.set_of_ten_dup.length == 1 do
-				@challenger = select_challenger
+	  	@challenger = select_challenger
 	      
-	      system "clear"
+	    system "clear"
 
-				
-			  display_choices
-				input = input_prompt
+		CLI.intro_image
+		display_choices
+		input = input_prompt
 	      
-				match_arr = add_businesses
+		match_arr = add_businesses
 
-				add_to_winner_loser_tables(match_arr[0],match_arr[1]) if input == '1' || input == '1!'
-				add_to_winner_loser_tables(match_arr[1],match_arr[0]) if input == '2' || input == '2!'
-				@winner = @challenger if input == '2' || input == '2!'
-				self.url = @winner[:url]
-				break if input == '1!' || input == '2!'
-
-				remove_from_match_options(input)
+		add_to_winner_loser_tables(match_arr[0],match_arr[1]) if input == '1' || input == '1!'
+		add_to_winner_loser_tables(match_arr[1],match_arr[0]) if input == '2' || input == '2!'
+		remove_from_match_options(input)
+		@winner = @challenger if input == '2' || input == '2!'
+		self.url = @winner[:url]
+		break if input == '1!' || input == '2!'
 	  end
 	  puts "We recommend you go to " + "#{@winner[:name]}".green + "!" 
   end
@@ -93,7 +92,7 @@ class Mealee
 
 	def choiceprompt
 		puts "\nPlease choose option" + " 1 ".blue + "or" + " 2".red + ".\nType" + " '1!' ".blue + "or" + " '2!' ".red + "if you've found on a winner."
-	  puts "Type" + " 'more' ".yellow + "to see Yelp pages.\n You can also type 'help' or 'exit'\n"
+	  puts "Type" + " 'more' ".yellow + "to see Yelp pages.\nYou can also type 'help' or 'exit'\n"
 	end
 	
 	def goodbye
@@ -104,6 +103,8 @@ class Mealee
 	def help
 		system "clear"
 		puts "\n        Mealee is designed to help the indecisive among us and is built using the Yelp Fusion API.  Mealee pulls local business data and puts businesses side by side, allowing the user to narrow their choices until they find a business they would like to go to.  To use, enter your zip code or address, then enter what you are interested in searching for.  Search broadly for things like 'dinner' or 'museums,' or more specifically for type of cuisine or business type.\n"
+		puts "\nThe nearer option's distance field will light up" + " green".green + "."
+		puts "\nIf an option has over 50 reviews and has a higher rating than the other, it will light up" + " green".green + "."
 		puts "\nThe yellow checkmark (" + "✔".yellow + ") indicates which option has won more total rounds between all users.\n"
 		puts "\nPress 'Enter' to continue or type 'exit' to end the program."
 		goodbye if gets.chomp == 'exit'
@@ -171,9 +172,23 @@ class Mealee
   end
 end
 
-  def format(array)
-    longest_key = array.keys.max_by(&:length)
-    array.each {|key, value| printf "%-#{longest_key.length}s %s\n", key, value if key != :url && key != :review_count}
+  def format(r1, r2)
+    longest_key = r1.keys.max_by(&:length)
+    r1.each do |key, value|
+    	if key == :distance && value.to_i < r2[:distance].to_i #&& key != :url && key != :review_count
+    		printf "%-#{longest_key.length}s %s\n", key, value.to_s.green if key != :url && key != :review_count
+    	elsif key == :rating && value.split(" ").first.to_f > r2[:rating].split(" ").first.to_f
+    		printf "%-#{longest_key.length}s %s\n", key, value.to_s.green if key != :url && key != :review_count
+    	elsif key == :rating && value.split(" ").first.to_f == r2[:rating].split(" ").first.to_f
+    		if r1[:review_count].to_i > r2[:review_count].to_f
+    			printf "%-#{longest_key.length}s %s\n", key, value.to_s.green if key != :url && key != :review_count
+    		else
+    			printf "%-#{longest_key.length}s %s\n", key, value if key != :url && key != :review_count
+    		end
+    	else
+    		printf "%-#{longest_key.length}s %s\n", key, value if key != :url && key != :review_count
+    	end
+    end
   end
 
   def display_choices
@@ -183,9 +198,9 @@ end
   	checkmark == 1 ? check1 = '✔'.yellow : check1 = ""
   	checkmark == 2 ? check2 = '✔'.yellow : check2 = ""
     puts "-------".blue + " 1 ".white.on_blue.blink + "------------------------ ".blue + check1
-    format(@winner)
+    format(@winner, @challenger)
     puts "-------".red + " 2 ".white.on_red.blink + "------------------------ ".red + check2
-    format(@challenger)
+    format(@challenger, @winner)
     puts "----------------------------------"
   end
 
@@ -220,11 +235,11 @@ end
   	winner_wins = 0
   	challenger_wins = 0
   	checkmark = nil
-  	if Restaurant.find_by(name: @winner[:name].uncolorize)
-  		winner_wins = Restaurant.find_by(name: @winner[:name].uncolorize).wins
+  	if Restaurant.find_by(location: @winner[:location].uncolorize)
+  		winner_wins = Restaurant.find_by(location: @winner[:location].uncolorize).wins
   	end
-  	if Restaurant.find_by(name: @challenger[:name].uncolorize)
-  		challenger_wins = Restaurant.find_by(name: @challenger[:name].uncolorize).wins
+  	if Restaurant.find_by(location: @challenger[:location].uncolorize)
+  		challenger_wins = Restaurant.find_by(location: @challenger[:location].uncolorize).wins
   	end
   	
   	if winner_wins > challenger_wins

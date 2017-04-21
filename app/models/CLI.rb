@@ -9,7 +9,10 @@ def self.intro_image
 	puts '| |\/| |/ _ \/ _  | |/ _ \/ _ \.'.red
 	puts '| |  | |  __/ (_| | |  __/  __/'.red
 	puts '|_|  |_|\___|\__,_|_|\___|\___|'.red
+	puts "\n"
+end
 
+def self.welcome
 	puts "Welcome to Mealee!"
 end
 

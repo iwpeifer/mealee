@@ -9,6 +9,7 @@ require "colorize"
 require 'active_record'
 require 'rake'
 require 'sqlite3'
+require "pg"
 require 'yaml/store'
 require "launchy"
 
