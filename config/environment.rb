@@ -9,22 +9,20 @@ require "colorize"
 require 'active_record'
 require 'rake'
 require 'sqlite3'
-require "pg"
 require 'yaml/store'
 require "launchy"
 
-DBNAME = "mealee_records"
-connection_details = YAML::load(File.open('config/database.yml'))
-DB = ActiveRecord::Base.establish_connection(connection_details)
+ENV['DATABASE_URL'] ||= 'sqlite3:db/mealee_records.db'
 
 Dir[File.join(File.dirname(__FILE__), "../app/models", "*.rb")].each {|f| require f}
 Dir[File.join(File.dirname(__FILE__), "../lib/support", "*.rb")].each {|f| require f}
 
+ActiveRecord::Base.establish_connection(ENV["DATABASE_URL"])
 
 
 #DBRegistry[ENV["ACTIVE_RECORD_ENV"]].connect!
 
 
-if ENV["ACTIVE_RECORD_ENV"] == "test"
-  ActiveRecord::Migration.verbose = false
-end
+# if ENV["ACTIVE_RECORD_ENV"] == "test"
+#   ActiveRecord::Migration.verbose = false
+# end

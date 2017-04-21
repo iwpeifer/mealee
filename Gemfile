@@ -6,8 +6,11 @@ gem "OptionParser"
 gem "pry"
 gem "colorize"
 gem "activerecord"
-gem "sqlite3"
+gem 'pg'
 gem "rake"
 gem 'launchy', '~> 2.4', '>= 2.4.3'
 gem 'sinatra-activerecord'
-gem "pg"
+
+group :development, :test do
+    gem 'sqlite3', '1.3.13'
+end
