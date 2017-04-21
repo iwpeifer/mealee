@@ -11,6 +11,7 @@ require 'rake'
 require 'pg'
 require 'yaml/store'
 require "launchy"
+
 ENV['DATABASE_URL'] ||= 'sqlite3:db/mealee_records.db'
 
 Dir[File.join(File.dirname(__FILE__), "../app/models", "*.rb")].each {|f| require f}

@@ -1,2 +1,2 @@
 adapter: 'postgresql'
-database: 'db/mealee_records'
+database: 'db/mealee_records.db'
