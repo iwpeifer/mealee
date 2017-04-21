@@ -1,9 +1,4 @@
- __  __            _
-|  \/  |          | |
-| \  / | ___  __ _| | _✔_  ___
-| |\/| |/ _ \/ _  | |/ _ \/ _ \.
-| |  | |  __/ (_| | |  __/  __/
-|_|  |_|\___|\__,_|_|\___|\___|
+![Logo](./lib/readmepictures/logo.png)
 
 Mealee is designed to help the indecisive among us and is built using the Yelp Fusion API.  Mealee pulls local business data based on the user's search and matchs businesses side by side, allowing the user to narrow their choices until they find something they would like.  Mealee keeps track of individual users by name, saving their previous search location and top voted locations.  Users can view their top restaurants as well as the most voted restaurants overall.
 
@@ -15,7 +10,7 @@ Start Mealee by running 'ruby bin/run.rb' in your terminal from the main folder.
 
 Enter your name to start.  If your name exists in the the database, Mealee will know your previous search location and top ten businesses.
 
-![Logo](./lib/readmepictures/login.png)
+![Login](./lib/readmepictures/login.png)
 
 Once you enter your name, you will be given three options, play Mealee, view your top restaurants, or view the community's top restaurants.
 
@@ -39,3 +34,5 @@ At the end of the ten options, the winner will be presented.  If you are satisfi
 DATABASE INFORMATION
 
 There are User and Restaurant classes in Mealee that handle the instances of users and restaurants.  These are both tied to database tables through ActiveRecord, and use Winner and Loser joiner tables to store user votes.
+
+Mealee comes with a Rake file that allows you to utilize a few additional class methods for handling the user, restaurant, winner and loser tables. For instance, you can call methods for the total wins or losses for a specific restaurant or user, or even the biggest losers, or least favorite by user.
